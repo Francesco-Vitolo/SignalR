@@ -111,9 +111,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WpfApp1\WpfApp1.csproj">
+    <ProjectReference Include="..\Chat-Client\Chat-Client.csproj">
       <Project>{72fdaa2b-4968-4547-b103-0d8154f5dbae}</Project>
-      <Name>WpfApp1</Name>
+      <Name>Chat-Client</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

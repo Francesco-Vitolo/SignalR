@@ -20,7 +20,6 @@ namespace Chat_Server
             return Clients.Group(msg.groupname).GroupEmpfange(msg);
         }
 
-
         public async Task AddToGroup(string groupName)
         {
             await Groups.Add(Context.ConnectionId, groupName);
