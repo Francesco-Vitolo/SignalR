@@ -134,16 +134,14 @@ namespace WpfApp1
         }
         private void AddGroup_Click(object sender, RoutedEventArgs e)
         {
-            //Button b = (Button)sender;
-            //b.IsEnabled = false;
-            string add = tbNewGroup.Text;
-            chatHubProxy.Invoke("AddToGroup", add).Wait();
-            if (Groups.Keys.All(x => x != add)) //abfangen selber Gruppenname
+            string neueGruppe = tbNewGroup.Text;
+            chatHubProxy.Invoke("AddToGroup", neueGruppe).Wait();
+            if (Groups.Keys.All(x => x != neueGruppe)) //prüfen selber Gruppenname
             {
-                Groups.Add(add, new List<Message>());
+                Groups.Add(neueGruppe, new List<Message>());
                 lv.DataContext = null;         //reset listview
                 lv.DataContext = Groups.Keys;
-                MessageBox.Show($"Gruppe {add} hinzugefügt");
+                MessageBox.Show($"Gruppe {neueGruppe} hinzugefügt");
             }
             else
             {
@@ -154,7 +152,7 @@ namespace WpfApp1
         private void lv_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             chatHubProxy.Invoke("RemoveGroup", aktuelleGruppe);
-            ListView_MouseDoubleClick(lv, null); //des gewünschte Objekt wird ausgewählt
+            ListView_MouseDoubleClick(lv, null); //das gewünschte Objekt wird ausgewählt
             Groups.Remove(aktuelleGruppe);
             lv.SelectedIndex = 0;
             ListView_MouseDoubleClick(lv, null); // springt auf die erste Gruppe

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="900" Width="1600" KeyUp="Window_KeyUp" FontSize="28" Background="#FF4B6676">
+        Title="Francesco" Height="900" Width="1600" KeyUp="Window_KeyUp" FontSize="28" Background="#FF4B6676">
     <Window.Resources>
         <Style TargetType="TextBox">
             <Setter Property="BorderThickness" Value="0"/>
