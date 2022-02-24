@@ -25,7 +25,7 @@ namespace WpfApp1
     {
         HubConnection hubConnection = new HubConnection("http://localhost:56871/");
         IHubProxy chatHubProxy;
-        private Dictionary<string, List<string>> Groups = new Dictionary<string,List<string>>();
+        private Dictionary<string, List<Message>> Groups = new Dictionary<string,List<Message>>();
         public string aktuelleGruppe;
         private string userId;
         public MainWindow()
@@ -33,35 +33,36 @@ namespace WpfApp1
             InitializeComponent();
             OnStartUp();
 
-            chatHubProxy.On<string, string, string>("GroupEmpfange", (text, groupName, senderID) => Dispatcher.Invoke(() =>
+            chatHubProxy.On<Message>("GroupEmpfange", (msg) => Dispatcher.Invoke(() =>
             {
-                aktuelleGruppe = groupName;
-                var v = Groups[aktuelleGruppe]; //list rausholen und text hinzufügen
-                v.Add(text);
-                Groups[aktuelleGruppe] = v;
+            
+                aktuelleGruppe = msg.groupname;
+                var list = Groups[aktuelleGruppe]; //list rausholen und text hinzufügen
+                list.Add(msg);
+                Groups[aktuelleGruppe] = list;
                 scrollBar.ScrollToBottom(); //scrollbar springt auf letztes Element
                 if (GroupName.Text == aktuelleGruppe)
                 {
-                    if (userId == senderID)
+                    if (userId == msg.connID)
                     {
-                        tbSendNachrichten.Text += "\n" + text;
+                        tbSendNachrichten.Text += msg.ToString();
                         tbEmpfNachrichten.Text += "\n\n\n";
                     }
                     else
                     {
-                        tbEmpfNachrichten.Text += "\n" + text;
+                        tbEmpfNachrichten.Text += msg.ToString();
                         tbSendNachrichten.Text += "\n\n\n";
                     }
                 }
-                else
+                else //wenn user andere Gruppe ausgewählt hat
                 {
                     //notification
-                    if (userId != senderID) //wenn Nachricht nicht selbst verschickt wird
+                    if (userId != msg.connID) //wenn Nachricht nicht selbst verschickt wird
                     {
                         new ToastContentBuilder()
                             .AddArgument("action", "viewConversation")
-                            .AddText($"{aktuelleGruppe}")
-                            .AddText($"{text.Substring(0,text.Length-5)}")
+                            .AddText($"{msg.groupname}")
+                            .AddText($"{msg.sender}: {msg.text}")
                             .Show();
                     }
                 }
@@ -81,15 +82,15 @@ namespace WpfApp1
         }
         private void AddToGroups()
         {
-            Groups.Add("Nickgür", new List<string>());
-            Groups.Add("Drilon", new List<string>());
-            Groups.Add("Nick", new List<string>());
-            Groups.Add("Tim", new List<string>());
-            Groups.Add("Alice", new List<string>());
-            Groups.Add("Bob", new List<string>());
-            Groups.Add("Moooooooooin", new List<string>());
-            Groups.Add("WI20Z1A", new List<string>());
-            Groups.Add("X Æ A-12", new List<string>());
+            Groups.Add("Nickgür", new List<Message>());
+            Groups.Add("Drilon", new List<Message>());
+            Groups.Add("Nick", new List<Message>());
+            Groups.Add("Tim", new List<Message>());
+            Groups.Add("Alice", new List<Message>());
+            Groups.Add("Bob", new List<Message>());
+            Groups.Add("Moooooooooin", new List<Message>());
+            Groups.Add("WI20Z1A", new List<Message>());
+            Groups.Add("X Æ A-12", new List<Message>());
 
             foreach (var gruppe in Groups.Keys.ToList())
             {
@@ -101,7 +102,8 @@ namespace WpfApp1
         {
             if (tbSendeNachricht.Text != "") // Nur wenn Text geschrieben
             {
-                chatHubProxy.Invoke("SendMessageToGroup", aktuelleGruppe, tbSendeNachricht.Text, tbusername.Text);
+                Message msg = new Message(tbSendeNachricht.Text, DateTime.Now, tbusername.Text, aktuelleGruppe, userId);
+                chatHubProxy.Invoke("SendMessageToGroup", msg);
                 tbSendeNachricht.Text = "";
             }
         }
@@ -117,14 +119,14 @@ namespace WpfApp1
             {
                 foreach (var message in Groups[aktuelleGruppe])
                 {
-                    if (message.Contains(userId.Substring(0, 5))) //gesendete rechts und empfangene links
+                    if (message.connID == userId) //gesendete rechts und empfangene links
                     {
-                        tbSendNachrichten.Text += "\n" + message;
+                        tbSendNachrichten.Text += message.ToString();
                         tbEmpfNachrichten.Text += "\n\n\n";
                     }
                     else
                     {
-                        tbEmpfNachrichten.Text += "\n" + message;
+                        tbEmpfNachrichten.Text += message.ToString();
                         tbSendNachrichten.Text += "\n\n\n";
                     }
                 }
@@ -138,7 +140,7 @@ namespace WpfApp1
             chatHubProxy.Invoke("AddToGroup", add).Wait();
             if (Groups.Keys.All(x => x != add)) //abfangen selber Gruppenname
             {
-                Groups.Add(add, new List<string>());
+                Groups.Add(add, new List<Message>());
                 lv.DataContext = null;         //reset listview
                 lv.DataContext = Groups.Keys;
                 MessageBox.Show($"Gruppe {add} hinzugefügt");

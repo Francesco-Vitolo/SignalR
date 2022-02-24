@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.SignalR;
+using WpfApp1;
 
 namespace Chat_Server
 {
@@ -14,9 +15,9 @@ namespace Chat_Server
             return Clients.Others.Empfange(text);
         }
 
-        public Task SendMessageToGroup(string groupName, string message, string name)
+        public Task SendMessageToGroup(Message msg)
         {
-            return Clients.Group(groupName).GroupEmpfange($"{name}({Context.ConnectionId.Substring(0,5)})\n{message}\n{DateTime.Now:HH:mm}", groupName, Context.ConnectionId); 
+            return Clients.Group(msg.groupname).GroupEmpfange(msg);
         }
 
 
